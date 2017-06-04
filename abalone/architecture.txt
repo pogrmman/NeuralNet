@@ -1,0 +1,21 @@
+deep_abalone_network has 4 hidden layers and 1 softmax layer. 
+It takes a 10 item vector -- using one-hot encoding for sex.
+All hidden layers have tanh activation.
+The architecture is as folllows:
+
+9 tanh -> 8 tanh -> 7 tanh -> 6 tanh -> 6 softmax
+
+The hidden layers were trained as a stack of autoencoders, then a softmax layer
+was added on. For the autoencoders, learning rate was 0.05, L2 reg was 0.0025,
+50 epochs on training set using full gradient descent.
+
+For the final training, learning rate was 0.05, L2 reg was 0.0025, 25 epochs on 
+training set using full gradient descent. 
+
+The final network had 59% classification accuracy on the test set.
+
+Better results would likely be obtained with minibatch gradient descent with 
+momentum, and with different hyperparameters. It is a start though.
+
+A 6 category classification scheme was used, using the integer divison of the
+number of rings by 5 to sort into classes.
