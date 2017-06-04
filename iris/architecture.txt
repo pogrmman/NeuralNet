@@ -1,0 +1,11 @@
+On this dataset, a network with one hidden layer of 7 softplus units, and a
+3 unit softmax classifier achieves 95% classification accuracy on the test
+dataset. On the training data, it achieves 96%. This is indicative of slight,
+but not terrible overfitting of the data. The network was trained with a
+learning rate of 0.01, a L2 regularization coefficient of 0.01, and momentum
+coefficient of 0.5. 
+
+A network trained in the same manner with a hidden layer of 7 relu units
+achieved 100% classification accuracy on the test data. This is likely due to
+random chance as to the items selected for the test dataset. On the training
+dataset, it achieves 95% classification accuracy.
