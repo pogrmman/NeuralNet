@@ -35,8 +35,8 @@ that describe the network.
 
 You can train a network with `Network.train($TRAINING_DATA$,$EPOCHS$)`
 
-All functions, classes, and methods have a docstring, so you can use `help()` to
-find usage information for any of them.
+All functions, classes, and methods have a docstring containing usage
+information, so `help()` can be used to find usage information.
 
 ###### Dependencies
 This is built with [Theano 0.9.0](http://deeplearning.net/software/theano/),
