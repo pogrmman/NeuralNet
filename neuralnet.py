@@ -297,7 +297,8 @@ class BasicLayer(Layer):
     """
     def __init__(self, rng: "random number generator",
                        inputs: "integer",
-                       outputs: "integer"):
+                       outputs: "integer",
+                       init_type: "string" = "glorot"):
         """Initialize the layer.
         
         Usage:
@@ -307,15 +308,33 @@ class BasicLayer(Layer):
         rng -- A numpy RandomState.
         inputs -- The number of inputs to this layer.
         outputs -- The number of neurons in this layer.
+        init_type -- The type of initialization to use.
         
+        May raise a not implemented error if the init_type is not supported.
         This method is only intended to be called by children of this class
         during their initialization.
         """
-        init_limit = numpy.sqrt(6. / (inputs + outputs)) # Glorot, Bengio 2010 
-        w_values = numpy.asarray(rng.uniform(low = -init_limit,
-                                             high = init_limit,
-                                             size = (inputs, outputs)),
-                                 dtype = theano.config.floatX)
+        if init_type == "glorot": # Glorot, Bengio 2010 
+            init_limit = numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        elif init_type == "glorot_tanh": # Glorot, Bengio 2010 
+            init_limit = 4 * numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        elif init_type == "he": # He, et al 2015
+            init_std_dev = numpy.sqrt(2 / outputs)
+            w_values = numpy.asarray(rng.normal(loc = 0,
+                                                scale = init_std_dev,
+                                                size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        else:
+            raise NotImplementedError("The initilization type " + init_type +
+                                      " is not supported")
         self.outputs = outputs
         self.inputs = inputs
         super().__init__(w_values)
@@ -343,7 +362,7 @@ class Tanh(BasicLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.tanh
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "glorot_tanh")
         
 ## ReLU Layer ##        
 class ReLU(BasicLayer):
@@ -367,7 +386,7 @@ class ReLU(BasicLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.nnet.relu
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "he")
         
 ## Softplus Layer ##
 class SoftPlus(BasicLayer):
@@ -391,7 +410,7 @@ class SoftPlus(BasicLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.nnet.softplus
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "he")
 
 ## Sigmoid Layer ##        
 class Sigmoid(BasicLayer):
