@@ -17,7 +17,7 @@ quadratic
 
 **Evaluation methods:** classification accuracy, autoencoder accuracy
 
-**Supported layer initialization methods:** Glorot
+**Supported layer initialization methods:** Glorot, He (for relu and softplus)
 
 **Other features:** saving and loading networks to the disk, constructing
 networks from arbitrary layers -- even ones trained in other networks
@@ -33,8 +33,8 @@ networks from arbitrary layers -- even ones trained in other networks
 
 **Evaluation Methods:** better autoencoder accuracy, cost value 
 
-**Layer initialization methods:** He (for relu and softplus), layer sequential
-unit variance (Mishkin, Matas 2016)
+**Layer initialization methods:** layer sequential unit variance 
+(Mishkin, Matas 2016)
 
 
 ### Usage
