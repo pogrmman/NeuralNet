@@ -33,7 +33,8 @@ networks from arbitrary layers -- even ones trained in other networks
 
 **Evaluation Methods:** better autoencoder accuracy, cost value 
 
-**Layer initialization methods:** He (for relu and softplus)
+**Layer initialization methods:** He (for relu and softplus), layer sequential
+unit variance (Mishkin, Matas 2016)
 
 
 ### Usage
