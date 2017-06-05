@@ -193,7 +193,7 @@ class Network(object):
     
     def _basic_train(self, data: "list of lists", 
                            epochs: "integer", ):
-        """Train the neural network using SGD
+        """Train the neural network using SGD.
         
         Usage:
         train(data, epochs)
@@ -214,14 +214,30 @@ class Network(object):
                                 epochs: "integer",
                                 validation: "list of lists",
                                 min_epochs = 0,
-                                check_every = 0):
-        ### Pseudocode ###
-        # train several epochs
-        # check to see if the cost on validation data has improved
-            # ideally, this would be compared against average of past
-            # several iterations until minibatches are added
-        # if it has, go back to top
-        # otherwise, quit
+                                check_every = 0
+                                threshold = 0.20):
+        """Train the neural network with SGD and early stopping.
+        
+        Usage:
+        train(data, epochs, validation[, min_epochs, check_every, threshold])
+
+        Arguments:
+        data -- A list of training examples of the form
+                [[data],[intended output]].
+        epochs -- The number of epochs to train for.
+        validation -- A list of validation examples of the form
+                      [[data],[intended output]].
+        min_epochs -- The minimum number of epochs to train for. Defaults to
+                      1/5 of epochs.
+        check_every -- Check validation cost after this many epochs. Defaults to
+                       1/5 of min_epochs.
+        threshold -- The tolerance for increases in error as a porportion.
+                     Defaults to 0.20.
+
+        This method updates the weights and biases of the network using the
+        backprop method. It stops the training early if the performance on
+        the validation data decreases too much.
+        """
         if min_epochs == 0:
             min_epochs = epochs // 5
         if check_every == 0:
@@ -246,7 +262,7 @@ class Network(object):
                 cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
-                threshold = avg * 0.15
+                threshold = avg * tolerance
                 if cost > avg + threshold:
                     print("Stopping early!")
                     break
