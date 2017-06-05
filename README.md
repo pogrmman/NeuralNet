@@ -33,6 +33,8 @@ To create a basic neural network, you use a command like
 net_description is a list of tuples of the form `(number_of_nodes, layer_type)`
 that describe the network.
 
+You can train a network with `Network.train($TRAINING_DATA$,$EPOCHS)`
+
 All functions, classes, and methods have a docstring, so you can use `help()` to
 find usage information for any of them.
 
