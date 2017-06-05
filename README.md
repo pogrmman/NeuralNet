@@ -28,7 +28,7 @@ networks from arbitrary layers -- even ones trained in other networks
 
 **Cost functions:** negative log-likelihood
 
-**Training:** minibatch SGD
+**Training:** minibatch SGD, early stopping
 
 **Regularization:** optional dropout, optional minibatch normalization
 

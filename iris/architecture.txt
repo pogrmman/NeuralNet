@@ -9,3 +9,9 @@ A network trained in the same manner with a hidden layer of 7 relu units
 achieved 100% classification accuracy on the test data. This is likely due to
 random chance as to the items selected for the test dataset. On the training
 dataset, it achieves 95% classification accuracy.
+
+Another network with 3 hidden tanh units was able to achieve 100% classification
+accuracy on the test data, and 95% on the training data. The network was
+pretrained with the hidden layer as an autoencoder on scaled data. The
+finetuning parameters were 0.01 learning rate and L2 regularization coefficient
+with a momentum of 0.5.
