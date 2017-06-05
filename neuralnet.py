@@ -541,7 +541,7 @@ def eval(net: "Network object", test_set: "list of lists"):
 def eval_autoenc(ae,data):
     sum = 0
     for i in range(0,len(data)):
-        sample = random.choice(data)[0]
+        sample = data[i][0]
         errs = [abs(i) + abs(j) for i,j in zip(sample,ae.forwardprop([sample]).tolist()[0])]
         sum += numpy.sum(errs)
     return sum / len(data)
