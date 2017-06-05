@@ -16,6 +16,7 @@ from theano import tensor
 
 ##### Classes #####
 ### Network Class ###
+### TODO: Improve training
 class Network(object):
     """Create a feedforward neural network
     
