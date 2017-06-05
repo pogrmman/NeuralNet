@@ -297,7 +297,8 @@ class BasicLayer(Layer):
     """
     def __init__(self, rng: "random number generator",
                        inputs: "integer",
-                       outputs: "integer"):
+                       outputs: "integer",
+                       init_type: "string" = "glorot"):
         """Initialize the layer.
         
         Usage:
@@ -307,47 +308,25 @@ class BasicLayer(Layer):
         rng -- A numpy RandomState.
         inputs -- The number of inputs to this layer.
         outputs -- The number of neurons in this layer.
+        init_type -- The type of initialization to use.
         
+        May raise a not implemented error if the init_type is not supported.
         This method is only intended to be called by children of this class
         during their initialization.
         """
-        init_limit = numpy.sqrt(6. / (inputs + outputs)) # Glorot, Bengio 2010 
-        w_values = numpy.asarray(rng.uniform(low = -init_limit,
-                                             high = init_limit,
-                                             size = (inputs, outputs)),
-                                 dtype = theano.config.floatX)
-        self.outputs = outputs
-        self.inputs = inputs
-        super().__init__(w_values)
-        
-class ReLULikeLayer(Layer):
-    """Parent class for ReLU-like layer types.
-    
-    Provides the following attributes:
-    outputs -- Number of neurons in layer.
-    inputs -- Number of inputs to layer.
-    
-    Not intended to be instantiated directly.
-    """
-    def __init__(self, rng: "random number generator",
-                       inputs: "integer",
-                       outputs: "integer"):
-        """Initialize the layer.
-        
-        Usage:
-        __init__(rng, inputs, outputs)
-        
-        Arguments:
-        rng -- A numpy RandomState.
-        inputs -- The number of inputs to this layer.
-        outputs -- The number of neurons in this layer.
-        
-        This method is only intended to be called by children of this class
-        during their initialization.
-        """
-        w_values = numpy.asarray(rng.normal(size = (inputs, outputs)) * 
-                                 numpy.sqrt(2 / outputs),
-                                 dtype = theano.config.floatX) # He, et al 2015
+        if init_type == "glorot": # Glorot, Bengio 2010 
+            init_limit = numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        elif init_type = "he": # He, et al 2015
+            w_values = numpy.asarray(rng.normal(size = (inputs, outputs)) * 
+                                     numpy.sqrt(2 / outputs),
+                                     dtype = theano.config.floatX)
+        else:
+            raise NotImplementedError("The initilization type " + init_type +
+                                      " is not supported")
         self.outputs = outputs
         self.inputs = inputs
         super().__init__(w_values)
@@ -378,7 +357,7 @@ class Tanh(BasicLayer):
         super().__init__(rng, inputs, outputs)
         
 ## ReLU Layer ##        
-class ReLU(ReLULikeLayer):
+class ReLU(BasicLayer):
     """Layer with rectified linear activation.
     
     Provides the following method:
@@ -399,10 +378,10 @@ class ReLU(ReLULikeLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.nnet.relu
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "he")
         
 ## Softplus Layer ##
-class SoftPlus(ReLULikeLayer):
+class SoftPlus(BasicLayer):
     """Layer with softplus activation.
     
     Provides the following method:
@@ -423,7 +402,7 @@ class SoftPlus(ReLULikeLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.nnet.softplus
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "he")
 
 ## Sigmoid Layer ##        
 class Sigmoid(BasicLayer):
