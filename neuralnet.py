@@ -17,7 +17,6 @@ from theano import tensor
 ##### Classes #####
 ### Network Class ###
 ### TODO: Improve training
-### TODO: Add early stopping to training based on validation data (optional)
 class Network(object):
     """Create a feedforward neural network
     
@@ -34,7 +33,7 @@ class Network(object):
     def __init__(self, net_data: "list of tuples", rate: "float", 
                        reg_coeff: "float" = 0, momentum_coeff: "float" = 0,
                        cost_type: "string"  = "categorical crossentropy",
-                       seed: "integer" = 100):
+                       seed: "integer" = 100, early_stop: "boolean" = False):
         """Initialize the neural network
         
         Usage:
@@ -60,6 +59,7 @@ class Network(object):
             outputs = self._data[i][0]
             self.layers.append(self._make_layer(kind, inputs, outputs))
         self._set_cost(cost_type)
+        self._set_train(early_stop)
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
         
@@ -119,6 +119,13 @@ class Network(object):
         else:
             raise NotImplementedError("The cost type " + kind +
                                        " is unimplemented.")
+                                       
+    def _set_train(self, early_stop: "boolean"):
+        if early_stop:
+            self.train = self._early_stop_train
+        else:
+            self.train = self._basic_train
+            
     def _build_forwardprop(self):
         """Compile a theano function for forwardpropagation
         
@@ -180,8 +187,8 @@ class Network(object):
                                  updates = self._updates,
                                  allow_input_downcast = True)
     
-    def train(self, data: "list of lists", 
-                    epochs: "integer", ):
+    def _basic_train(self, data: "list of lists", 
+                           epochs: "integer", ):
         """Train the neural network using SGD
         
         Usage:
@@ -198,6 +205,18 @@ class Network(object):
         for i in range(0, epochs):
             item = random.choice(data)
             self.backprop([item[0]],[item[1]])
+    
+    def _early_stop_train(self, data: "list of lists",
+                                epochs: "integer",
+                                validation: "list of lists"):
+        ### Pseudocode ###
+        # train several epochs
+        # check to see if the cost on validation data has improved
+            # ideally, this would be compared against average of past
+            # several iterations until minibatches are added
+        # if it has, go back to top
+        # otherwise, quit
+        pass
                 
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
