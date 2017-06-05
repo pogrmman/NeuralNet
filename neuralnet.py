@@ -319,6 +319,38 @@ class BasicLayer(Layer):
         self.outputs = outputs
         self.inputs = inputs
         super().__init__(w_values)
+        
+class ReLULikeLayer(Layer):
+    """Parent class for ReLU-like layer types.
+    
+    Provides the following attributes:
+    outputs -- Number of neurons in layer.
+    inputs -- Number of inputs to layer.
+    
+    Not intended to be instantiated directly.
+    """
+    def __init__(self, rng: "random number generator",
+                       inputs: "integer",
+                       outputs: "integer"):
+        """Initialize the layer.
+        
+        Usage:
+        __init__(rng, inputs, outputs)
+        
+        Arguments:
+        rng -- A numpy RandomState.
+        inputs -- The number of inputs to this layer.
+        outputs -- The number of neurons in this layer.
+        
+        This method is only intended to be called by children of this class
+        during their initialization.
+        """
+        w_values = numpy.asarray(rng.normal(size = (inputs, outputs)) * 
+                                 numpy.sqrt(2 / outputs),
+                                 dtype = theano.config.floatX) # He, et al 2015
+        self.outputs = outputs
+        self.inputs = inputs
+        super().__init__(w_values)
 
 ### Layer Classes ###
 ## Hyperbolic Tangent Layer ##
@@ -346,7 +378,7 @@ class Tanh(BasicLayer):
         super().__init__(rng, inputs, outputs)
         
 ## ReLU Layer ##        
-class ReLU(BasicLayer):
+class ReLU(ReLULikeLayer):
     """Layer with rectified linear activation.
     
     Provides the following method:
@@ -370,7 +402,7 @@ class ReLU(BasicLayer):
         super().__init__(rng, inputs, outputs)
         
 ## Softplus Layer ##
-class SoftPlus(BasicLayer):
+class SoftPlus(ReLULikeLayer):
     """Layer with softplus activation.
     
     Provides the following method:
