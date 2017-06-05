@@ -186,7 +186,7 @@ class Network(object):
                                  outputs = self.cost,
                                  updates = self._updates,
                                  allow_input_downcast = True)
-        # Compile cost calculation method
+        # Compile cost method that does not update params
         self.cost_calc = function(inputs = [self._inpt, self._otpt],
                                   outputs = self.cost,
                                   allow_input_downcast = True)
@@ -222,8 +222,33 @@ class Network(object):
         # otherwise, quit
         min_epochs = epochs * .2
         check_every = min_epochs / 5
-        
-        pass
+        item = random.choice(validation)
+        cost = self.cost_calc([item[0]],[item[1]])
+        print("Epoch 0 -- cost is " + str(round(cost,2)))
+        costs = [cost]
+        for i in range(1,min_epochs):
+            item = random.choice(data)
+            self.backprop([item[0]],[item[1]])
+            if i % check_every == 0:
+                item = random.choice(validation)
+                cost = self.cost_calc([item[0]],[item[1]])
+                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
+                costs.append(cost)
+        for i in range(min_epochs,epochs):
+            item = random.choice(data)
+            self.backprop([item[0]],[item[1]])
+            if i % check_every == 0:
+                item = random.choice(validation)
+                cost = self.cost_calc([item[0]],[item[1]])
+                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
+                avg = numpy.mean(costs)
+                threshold = avg * 0.01
+                if cost - avg < threshold:
+                    print("Stopping early!")
+                    break
+                else:
+                    costs = [1:]
+                    costs.append(cost)
                 
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
