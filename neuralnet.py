@@ -212,7 +212,9 @@ class Network(object):
     
     def _early_stop_train(self, data: "list of lists",
                                 epochs: "integer",
-                                validation: "list of lists"):
+                                validation: "list of lists",
+                                min_epochs = 0,
+                                check_every = 0):
         ### Pseudocode ###
         # train several epochs
         # check to see if the cost on validation data has improved
@@ -220,10 +222,12 @@ class Network(object):
             # several iterations until minibatches are added
         # if it has, go back to top
         # otherwise, quit
-        min_epochs = epochs * .2
-        check_every = min_epochs / 5
+        if min_epochs == 0:
+            min_epochs = epochs // 5
+        if check_every == 0:
+            check_every = min_epochs // 5
         item = random.choice(validation)
-        cost = self.cost_calc([item[0]],[item[1]])
+        cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
         for i in range(1,min_epochs):
@@ -231,7 +235,7 @@ class Network(object):
             self.backprop([item[0]],[item[1]])
             if i % check_every == 0:
                 item = random.choice(validation)
-                cost = self.cost_calc([item[0]],[item[1]])
+                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 costs.append(cost)
         for i in range(min_epochs,epochs):
@@ -239,15 +243,15 @@ class Network(object):
             self.backprop([item[0]],[item[1]])
             if i % check_every == 0:
                 item = random.choice(validation)
-                cost = self.cost_calc([item[0]],[item[1]])
+                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
-                threshold = avg * 0.01
-                if cost - avg < threshold:
+                threshold = avg * 0.15
+                if cost > avg + threshold:
                     print("Stopping early!")
                     break
                 else:
-                    costs = [1:]
+                    costs = costs[1:]
                     costs.append(cost)
                 
 class BuildNetwork(Network):
