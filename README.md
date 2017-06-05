@@ -1,11 +1,11 @@
 ### Neural Network
 
-##### Introduction
+#### Introduction
 This is a module that provides objects and functions that are useful for
 constructing neural networks. The simplest way to use it is to go type 
 `import neuralnetwork` in an interactive Python shell, and go from there.
 
-##### Features
+#### Features
 **Supported layer types:** tanh, sigmoid, relu, softplus, softmax
 
 **Supported cost functions:** categorical crossentropy, binary crossentropy, 
@@ -22,7 +22,7 @@ quadratic
 **Other features:** saving and loading networks to the disk, constructing
 networks from arbitrary layers -- even ones trained in other networks
 
-##### Planned Features
+#### Planned Features
 **Layer types:** convolutional, lstm
 
 **Cost functions:** negative log-likelihood
@@ -36,7 +36,7 @@ networks from arbitrary layers -- even ones trained in other networks
 **Layer initialization methods:** He (for relu and softplus)
 
 
-##### Usage
+#### Usage
 First install [Theano 0.9.0](http://deeplearning.net/software/theano/) and 
 [Numpy](http://www.numpy.org/). You can configure Theano however you'd like, 
 however, this code has not been tested on a GPU, so procede with caution.
@@ -69,7 +69,7 @@ You can train a network with `Network.train($TRAINING_DATA$,$EPOCHS$)`
 All functions, classes, and methods have a docstring containing usage
 information, so `help()` can be used to find usage information.
 
-##### Dependencies
+#### Dependencies
 This is built with [Theano 0.9.0](http://deeplearning.net/software/theano/),
 [Numpy 1.9.2](http://www.numpy.org/), 
 and [Python 3.4.3](https://www.python.org/).
