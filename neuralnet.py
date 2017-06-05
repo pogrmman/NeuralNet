@@ -186,6 +186,10 @@ class Network(object):
                                  outputs = self.cost,
                                  updates = self._updates,
                                  allow_input_downcast = True)
+        # Compile cost calculation method
+        self.cost_calc = function(inputs = [self._inpt, self._otpt],
+                                  outputs = self.cost,
+                                  allow_input_downcast = True)
     
     def _basic_train(self, data: "list of lists", 
                            epochs: "integer", ):
@@ -216,6 +220,9 @@ class Network(object):
             # several iterations until minibatches are added
         # if it has, go back to top
         # otherwise, quit
+        min_epochs = epochs * .2
+        check_every = min_epochs / 5
+        
         pass
                 
 class BuildNetwork(Network):
