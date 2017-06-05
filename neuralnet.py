@@ -320,9 +320,17 @@ class BasicLayer(Layer):
                                                  high = init_limit,
                                                  size = (inputs, outputs)),
                                      dtype = theano.config.floatX)
+        elif init_type == "glorot_tanh": # Glorot, Bengio 2010 
+            init_limit = 4 * numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
         elif init_type = "he": # He, et al 2015
-            w_values = numpy.asarray(rng.normal(size = (inputs, outputs)) * 
-                                     numpy.sqrt(2 / outputs),
+            init_std_dev = numpy.sqrt(2 / outputs)
+            w_values = numpy.asarray(rng.normal(loc = 0,
+                                                scale = init_std_dev,
+                                                size = (inputs, outputs)),
                                      dtype = theano.config.floatX)
         else:
             raise NotImplementedError("The initilization type " + init_type +
@@ -354,7 +362,7 @@ class Tanh(BasicLayer):
         outputs -- The number of neurons in this layer.
         """
         self.function = tensor.tanh
-        super().__init__(rng, inputs, outputs)
+        super().__init__(rng, inputs, outputs, init_type = "glorot_tanh")
         
 ## ReLU Layer ##        
 class ReLU(BasicLayer):
