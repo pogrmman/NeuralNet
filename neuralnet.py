@@ -326,7 +326,7 @@ class BasicLayer(Layer):
                                                  high = init_limit,
                                                  size = (inputs, outputs)),
                                      dtype = theano.config.floatX)
-        elif init_type = "he": # He, et al 2015
+        elif init_type == "he": # He, et al 2015
             init_std_dev = numpy.sqrt(2 / outputs)
             w_values = numpy.asarray(rng.normal(loc = 0,
                                                 scale = init_std_dev,
