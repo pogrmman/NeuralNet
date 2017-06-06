@@ -57,6 +57,8 @@ class Network(object):
             inputs = self._data[i-1][0]
             outputs = self._data[i][0]
             self.layers.append(self._make_layer(kind, inputs, outputs))
+        if type(self.layers[-1]) == Softmax:
+            self.make_prediction = self._make_prediction
         self._set_cost(cost_type)
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
@@ -197,7 +199,7 @@ class Network(object):
             item = random.choice(data)
             self.backprop([item[0]],[item[1]])
 
-    def make_prediction(self, datum: "list"):
+    def _make_prediction(self, datum: "list"):
         return numpy.argmax(self.forwardprop([datum]))
 
 ### BuildNetwork Class ###
