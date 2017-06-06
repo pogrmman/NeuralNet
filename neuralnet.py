@@ -197,6 +197,9 @@ class Network(object):
             item = random.choice(data)
             self.backprop([item[0]],[item[1]])
 
+    def make_prediction(self, datum: "list"):
+        return numpy.argmax(self.forwardprop([datum]))
+
 ### BuildNetwork Class ###
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
@@ -235,7 +238,13 @@ class BuildNetwork(Network):
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
 
+### EnsembleClassifier Class ###
 class EnsembleClassifier(object):
+    """Builds an ensemble classifier from trained neural nets.
+
+    Provides the following method:
+    make_predicion -- 
+    """
     def __init__(self, nets):
         self.nets = nets
     def make_prediction(self, datum):
@@ -536,19 +545,14 @@ def eval(net: "Network or ensemble", test_set: "list of lists"):
     eval(net, test_set)
     
     Arguments:
-    net -- A classifier network, a Network object.
+    net -- A classifier network or ensemble.
     test_set -- The test data set, a list of lists of the form 
                 [[data], [intended output]].
     """
     correct = 0
-    if type(net) == Network:
-        for item in test_set:
-            if numpy.argmax([item[1]]) == numpy.argmax(net.forwardprop([item[0]])):
-                correct += 1
-    elif type(net) == EnsembleClassifier:
-        for item in test_set:
-            if numpy.argmax([item[1]]) == net.make_prediction(item[0]):
-                correct += 1
+    for item in test_set:
+        if numpy.argmax([item[1]]) == net.make_prediction(item[0]):
+            correct += 1
     return correct / len(test_set)
     
 ### Evaluate Autoencoders ###
