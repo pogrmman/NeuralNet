@@ -194,23 +194,25 @@ class Network(object):
                                   allow_input_downcast = True)
     
     def _basic_train(self, data: "list of lists", 
-                           epochs: "integer", ):
+                           epochs: "integer",
+                           minbatch_size: "integer"):
         """Train the neural network using SGD.
         
         Usage:
-        train(data, epochs)
+        train(data, epochs, minbatch_size)
         
         Arguments:
         data -- A list of training examples of the form 
                 [[data], [intended output]].
         epochs -- The number of epochs to train for.
+        minbatch_size -- The size of a minibatch.
         
         This method updates the weights and biases of the network using the
         backprop method.
         """
         for i in range(0, epochs):
-            item = random.choice(data)
-            self.backprop([item[0]],[item[1]])
+            item = [random.choice(data) for i in range(0,minbatch_size)]
+            self.backprop(item)
 
     def _make_prediction(self, datum: "list"):
         return numpy.argmax(self.forwardprop([datum]))
@@ -218,13 +220,14 @@ class Network(object):
     def _early_stop_train(self, data: "list of lists",
                                 epochs: "integer",
                                 validation: "list of lists",
+                                minbatch_size: "integer",
                                 min_epochs = 0,
                                 check_every = 0,
                                 tolerance = 0.20):
         """Train the neural network with SGD and early stopping.
         
         Usage:
-        train(data, epochs, validation[, min_epochs, check_every, threshold])
+        train(data, epochs, validation, minbatch_size[, min_epochs, check_every, threshold])
 
         Arguments:
         data -- A list of training examples of the form
@@ -232,6 +235,7 @@ class Network(object):
         epochs -- The number of epochs to train for.
         validation -- A list of validation examples of the form
                       [[data],[intended output]].
+        minbatch_size -- The size of a minibatch.
         min_epochs -- The minimum number of epochs to train for. Defaults to
                       1/5 of epochs.
         check_every -- Check validation cost after this many epochs. Defaults to
@@ -247,24 +251,24 @@ class Network(object):
             min_epochs = epochs // 5
         if check_every == 0:
             chkeck_every = min_epochs // 5
-        item = random.choice(validation)
-        cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+        item = [random.choice(validation) for i in range(0,minbatch_size)]
+        cost = numpy.mean(self.cost_calc(item))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
         for i in range(1,min_epochs):
-            item = random.choice(data)
-            self.backprop([item[0]],[item[1]])
+            item = [random.choice(data) for i in range(0,minbatch_size)]
+            self.backprop(item)
             if i % check_every == 0:
-                item = random.choice(validation)
-                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+                item = [random.choice(validation) for i in range(0,minbatch_size)]
+                cost = numpy.mean(self.cost_calc(item))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 costs.append(cost)
         for i in range(min_epochs,epochs):
-            item = random.choice(data)
-            self.backprop([item[0]],[item[1]])
+            item = [random.choice(data) for i in range(0,minbatch_size)]
+            self.backprop(item)
             if i % check_every == 0:
-                item = random.choice(validation)
-                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+                item = [random.choice(validation) for i in range(0,minbatch_size)]
+                cost = numpy.mean(self.cost_calc(item))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
                 threshold = avg * tolerance
