@@ -214,8 +214,8 @@ class Network(object):
                                 epochs: "integer",
                                 validation: "list of lists",
                                 min_epochs = 0,
-                                check_every = 0
-                                threshold = 0.20):
+                                check_every = 0,
+                                tolerance = 0.20):
         """Train the neural network with SGD and early stopping.
         
         Usage:
