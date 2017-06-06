@@ -11,28 +11,30 @@ constructing neural networks. The simplest way to use it is to go type
 **Supported cost functions:** categorical crossentropy, binary crossentropy, 
 quadratic
 
-**Training:** SGD with optional momentum
+**Training:** SGD with optional momentum, optional early stopping
 
 **Regularization:** optional L2
 
-**Evaluation methods:** classification accuracy, autoencoder accuracy
+**Evaluation methods:** classification accuracy, autoencoder accuracy, cost
+value
 
 **Supported layer initialization methods:** Glorot (for tanh and sigmoid), He
 (for relu and softplus)
 
 **Other features:** saving and loading networks to the disk, constructing
-networks from arbitrary layers -- even ones trained in other networks
+networks from arbitrary layers -- even ones trained in other networks,
+ensemble networks
 
 ### Planned Features
 **Layer types:** convolutional, lstm
 
 **Cost functions:** negative log-likelihood
 
-**Training:** minibatch SGD, early stopping
+**Training:** minibatch SGD
 
 **Regularization:** optional dropout, optional minibatch normalization
 
-**Evaluation Methods:** better autoencoder accuracy, cost value 
+**Evaluation Methods:** better autoencoder accuracy
 
 **Layer initialization methods:** layer sequential unit variance 
 (Mishkin, Matas 2016)
