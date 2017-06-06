@@ -196,7 +196,8 @@ class Network(object):
         for i in range(0, epochs):
             item = random.choice(data)
             self.backprop([item[0]],[item[1]])
-                
+
+### BuildNetwork Class ###
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
     def __init__(self, layer_list: "list of Layer objects", rate: "float",
@@ -234,6 +235,14 @@ class BuildNetwork(Network):
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
 
+class EnsembleClassifier(object):
+    def __init__(self, nets):
+        self.nets = nets
+    def make_prediction(self, datum):
+        preds = [numpy.argmax(net.forwardprop([datum])) for net in nets]
+        preds = collections.Counter(preds)
+        return preds.most_common(1)[0][0]
+    
 ### Layer Superclasses ###
 ## Base Layer Class ##
 class Layer(object):
