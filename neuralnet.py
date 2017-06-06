@@ -211,9 +211,15 @@ class Network(object):
         backprop method.
         """
         for i in range(0, epochs):
-            item = [random.choice(data) for i in range(0,minbatch_size)]
-            self.backprop(item)
+            item = self._make_minibatch(data, minbatch_size)
+            self.backprop(item[0], item[1])
 
+    def _make_minibatch(self, data, minbatch_size):
+        items = [random.choice(data) for i in range(0, minbatch_size)]
+        inpts = [item[0] for item in items]
+        otpts = [item[1] for item in items]
+        return (inpts,otpts)
+    
     def _make_prediction(self, datum: "list"):
         return numpy.argmax(self.forwardprop([datum]))
     
@@ -251,24 +257,24 @@ class Network(object):
             min_epochs = epochs // 5
         if check_every == 0:
             chkeck_every = min_epochs // 5
-        item = [random.choice(validation) for i in range(0,minbatch_size)]
-        cost = numpy.mean(self.cost_calc(item))
+        item = self._make_minibatch(validation, minbatch_size)
+        cost = numpy.mean(self.cost_calc(item[0],item[1]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
         for i in range(1,min_epochs):
-            item = [random.choice(data) for i in range(0,minbatch_size)]
-            self.backprop(item)
+            item = self._make_minibatch(data, minbatch_size)
+            self.backprop(item[0],item[1])
             if i % check_every == 0:
-                item = [random.choice(validation) for i in range(0,minbatch_size)]
-                cost = numpy.mean(self.cost_calc(item))
+                item = self._make_minibatch(validation, minbatch_size)
+                cost = numpy.mean(self.cost_calc(item[0],item[1]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 costs.append(cost)
         for i in range(min_epochs,epochs):
-            item = [random.choice(data) for i in range(0,minbatch_size)]
-            self.backprop(item)
+            item = self._make_minibatch(data, minbatch_size)
+            self.backprop(item[0],item[1])
             if i % check_every == 0:
-                item = [random.choice(validation) for i in range(0,minbatch_size)]
-                cost = numpy.mean(self.cost_calc(item))
+                item = self._make_minibatch(validation, minbatch_size)
+                cost = numpy.mean(self.cost_calc(item[0],item[1]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
                 threshold = avg * tolerance
