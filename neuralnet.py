@@ -16,7 +16,6 @@ from theano import tensor
 
 ##### Classes #####
 ### Network Class ###
-### TODO: Add layer sequential unit variance initilization
 class Network(object):
     """Create a feedforward neural network
     
@@ -33,7 +32,7 @@ class Network(object):
     def __init__(self, net_data: "list of tuples", rate: "float", 
                        reg_coeff: "float" = 0, momentum_coeff: "float" = 0,
                        cost_type: "string"  = "categorical crossentropy",
-                       seed: "integer" = 100):
+                       seed: "integer" = 100, early_stop: "boolean" = False):
         """Initialize the neural network
         
         Usage:
@@ -59,6 +58,7 @@ class Network(object):
             outputs = self._data[i][0]
             self.layers.append(self._make_layer(kind, inputs, outputs))
         self._set_cost(cost_type)
+        self._set_train(early_stop)
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
         
@@ -118,6 +118,13 @@ class Network(object):
         else:
             raise NotImplementedError("The cost type " + kind +
                                        " is unimplemented.")
+                                       
+    def _set_train(self, early_stop: "boolean"):
+        if early_stop:
+            self.train = self._early_stop_train
+        else:
+            self.train = self._basic_train
+            
     def _build_forwardprop(self):
         """Compile a theano function for forwardpropagation
         
@@ -178,10 +185,14 @@ class Network(object):
                                  outputs = self.cost,
                                  updates = self._updates,
                                  allow_input_downcast = True)
+        # Compile cost method that does not update params
+        self.cost_calc = function(inputs = [self._inpt, self._otpt],
+                                  outputs = self.cost,
+                                  allow_input_downcast = True)
     
-    def train(self, data: "list of lists", 
-                    epochs: "integer", ):
-        """Train the neural network using SGD
+    def _basic_train(self, data: "list of lists", 
+                           epochs: "integer", ):
+        """Train the neural network using SGD.
         
         Usage:
         train(data, epochs)
@@ -197,6 +208,66 @@ class Network(object):
         for i in range(0, epochs):
             item = random.choice(data)
             self.backprop([item[0]],[item[1]])
+    
+    def _early_stop_train(self, data: "list of lists",
+                                epochs: "integer",
+                                validation: "list of lists",
+                                min_epochs = 0,
+                                check_every = 0,
+                                tolerance = 0.20):
+        """Train the neural network with SGD and early stopping.
+        
+        Usage:
+        train(data, epochs, validation[, min_epochs, check_every, threshold])
+
+        Arguments:
+        data -- A list of training examples of the form
+                [[data],[intended output]].
+        epochs -- The number of epochs to train for.
+        validation -- A list of validation examples of the form
+                      [[data],[intended output]].
+        min_epochs -- The minimum number of epochs to train for. Defaults to
+                      1/5 of epochs.
+        check_every -- Check validation cost after this many epochs. Defaults to
+                       1/5 of min_epochs.
+        threshold -- The tolerance for increases in error as a porportion.
+                     Defaults to 0.20.
+
+        This method updates the weights and biases of the network using the
+        backprop method. It stops the training early if the performance on
+        the validation data decreases too much.
+        """
+        if min_epochs == 0:
+            min_epochs = epochs // 5
+        if check_every == 0:
+            check_every = min_epochs // 5
+        item = random.choice(validation)
+        cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+        print("Epoch 0 -- cost is " + str(round(cost,2)))
+        costs = [cost]
+        for i in range(1,min_epochs):
+            item = random.choice(data)
+            self.backprop([item[0]],[item[1]])
+            if i % check_every == 0:
+                item = random.choice(validation)
+                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
+                costs.append(cost)
+        for i in range(min_epochs,epochs):
+            item = random.choice(data)
+            self.backprop([item[0]],[item[1]])
+            if i % check_every == 0:
+                item = random.choice(validation)
+                cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
+                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
+                avg = numpy.mean(costs)
+                threshold = avg * tolerance
+                if cost > avg + threshold:
+                    print("Stopping early!")
+                    break
+                else:
+                    costs = costs[1:]
+                    costs.append(cost)
                 
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
