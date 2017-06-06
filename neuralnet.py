@@ -16,6 +16,7 @@ from theano import tensor
 
 ##### Classes #####
 ### Network Class ###
+### TODO: Add layer sequential unit variance initilization
 class Network(object):
     """Create a feedforward neural network
     
