@@ -1,0 +1,8 @@
+There are several neural net architetures that work well for this dataset.
+
+Around 65% - 69% test accuracy has been gotten with a deep, thin neural net of
+4-6 hidden ReLU or tanh layers on top of one softmax layer. The hidden layers have
+between 6 and 10 units.
+
+Around 60% - 65% has been gotten with a broad, shallow network of one hidden layer
+with between 30 and 200 units.

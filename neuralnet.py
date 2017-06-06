@@ -7,6 +7,7 @@
 import itertools
 import random
 import pickle
+import collections
 ### Other Modules ###
 import theano
 import numpy
@@ -245,7 +246,7 @@ class Network(object):
         if min_epochs == 0:
             min_epochs = epochs // 5
         if check_every == 0:
-            check_every = min_epochs // 5
+            chkeck_every = min_epochs // 5
         item = random.choice(validation)
         cost = numpy.mean(self.cost_calc([item[0]],[item[1]]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
@@ -322,7 +323,7 @@ class EnsembleClassifier(object):
     def __init__(self, nets):
         self.nets = nets
     def make_prediction(self, datum):
-        preds = [numpy.argmax(net.forwardprop([datum])) for net in nets]
+        preds = [numpy.argmax(net.forwardprop([datum])) for net in self.nets]
         preds = collections.Counter(preds)
         return preds.most_common(1)[0][0]
     
