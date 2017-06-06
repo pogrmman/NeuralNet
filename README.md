@@ -11,7 +11,7 @@ constructing neural networks. The simplest way to use it is to go type
 **Supported cost functions:** categorical crossentropy, binary crossentropy, 
 quadratic
 
-**Training:** SGD with optional momentum, optional early stopping
+**Training:** minibatch SGD with optional momentum, optional early stopping
 
 **Regularization:** optional L2
 
@@ -29,8 +29,6 @@ ensemble networks
 **Layer types:** convolutional, lstm
 
 **Cost functions:** negative log-likelihood
-
-**Training:** minibatch SGD
 
 **Regularization:** optional dropout, optional minibatch normalization
 
