@@ -6,3 +6,7 @@ between 6 and 10 units.
 
 Around 60% - 65% has been gotten with a broad, shallow network of one hidden layer
 with between 30 and 200 units.
+
+An ensemble of 7 neural nets with a variety of architectures (some deep and thin,
+others shallow and broad, with a variety of hidden activation units (relu/tanh/softplus),
+has achieved around 68% test acuracy. 
