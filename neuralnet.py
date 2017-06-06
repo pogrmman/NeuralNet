@@ -529,7 +529,7 @@ def quadratic_cost(x,y):
     return tensor.sum((x - y) ** 2)
     
 ### Evaluate Classifiers ###
-def eval(net: "Network object", test_set: "list of lists"):
+def eval(net: "Network or ensemble", test_set: "list of lists"):
     """Calculats the classification accuracy of a classifier.
     
     Usage:
@@ -541,9 +541,14 @@ def eval(net: "Network object", test_set: "list of lists"):
                 [[data], [intended output]].
     """
     correct = 0
-    for item in test_set:
-        if numpy.argmax([item[1]]) == numpy.argmax(net.forwardprop([item[0]])):
-            correct += 1
+    if type(net) == Network:
+        for item in test_set:
+            if numpy.argmax([item[1]]) == numpy.argmax(net.forwardprop([item[0]])):
+                correct += 1
+    elif type(net) == EnsembleClassifier:
+        for item in test_set:
+            if numpy.argmax([item[1]]) == net.make_prediction(item[0]):
+                correct += 1
     return correct / len(test_set)
     
 ### Evaluate Autoencoders ###
