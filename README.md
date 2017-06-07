@@ -39,9 +39,12 @@ ensemble networks
 
 
 ### Usage
-First install [Theano 0.9.0](http://deeplearning.net/software/theano/) and 
-[Numpy](http://www.numpy.org/). You can configure Theano however you'd like, 
-however, this code has not been tested on a GPU, so procede with caution.
+First install [Theano ~~0.9.0~~ 0.8.2](http://deeplearning.net/software/theano/) and 
+[Numpy](http://www.numpy.org/). Theano 0.9.0 works fine, but has a memory leak issue.
+It's not noticable on small networks, but on large ones, it can lead to crashing the
+system. You can configure Theano however you'd like, however, this code has not been
+tested on a GPU, so procede with caution. 
+
 You can then clone the repository with 
 `git clone https://github.com/pogrmman/NeuralNet.git`
 
@@ -72,6 +75,6 @@ All functions, classes, and methods have a docstring containing usage
 information, so `help()` can be used to find usage information.
 
 ### Dependencies
-This is built with [Theano 0.9.0](http://deeplearning.net/software/theano/),
+This is built with [Theano ~~0.9.0~~ 0.8.2](http://deeplearning.net/software/theano/),
 [Numpy 1.9.2](http://www.numpy.org/), 
 and [Python 3.4.3](https://www.python.org/).
