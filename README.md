@@ -77,4 +77,4 @@ information, so `help()` can be used to find usage information.
 ### Dependencies
 This is built with [Theano ~~0.9.0~~ 0.8.2](http://deeplearning.net/software/theano/),
 [Numpy 1.9.2](http://www.numpy.org/), 
-and [Python 3.4.3](https://www.python.org/).
+and [Python 3.4.3/3.5.3](https://www.python.org/).
