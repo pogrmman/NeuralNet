@@ -30,7 +30,7 @@ ensemble networks
 
 **Cost functions:** negative log-likelihood
 
-**Training:** optional earning rate schedule, optional momentum schedule
+**Training:** optional learning rate schedule, optional momentum schedule
 
 **Regularization:** optional dropout, optional minibatch normalization
 
