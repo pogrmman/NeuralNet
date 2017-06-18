@@ -23,8 +23,8 @@ class Network(object):
     Provides the following public methods:
     train -- Trains the neural network.
     forwardprop -- Forwardpropagate data through the network.
-    backprop -- Backpropagate through the network and update weights and biases.
-    
+    backprop -- Backpropagate through the network and update weights and biases.    
+
     Provides the following attributes:
     layers -- A list of Layer objects.
     cost -- A theano expression for the crossentropy cost of a training example.
@@ -37,7 +37,7 @@ class Network(object):
         """Initialize the neural network
         
         Usage:
-        __init__(net_data, rate[, reg_coeff, momentum_coeff, seed])
+        __init__(net_data, rate[, reg_coeff, momentum_coeff, seed, early_stop])
         
         Arguments:
         net_data -- A list of tuples of the form (number of neurons, layer type)
@@ -48,6 +48,7 @@ class Network(object):
         momentum_coeff -- The coefficient for momentum degradation.
         cost_type -- The type of cost function.
         seed -- A seed for the rng for initialization.
+        early_stop -- A boolean controlling whether to use early stopping.
         """
         reset_layer_ids()
         self._data = net_data
@@ -256,7 +257,7 @@ class Network(object):
         if min_epochs == 0:
             min_epochs = epochs // 5
         if check_every == 0:
-            chkeck_every = min_epochs // 5
+            check_every = min_epochs // 5
         item = self._make_minibatch(validation, minbatch_size)
         cost = numpy.mean(self.cost_calc(item[0],item[1]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
@@ -290,11 +291,12 @@ class BuildNetwork(Network):
     """Builds a network from a list of layers."""
     def __init__(self, layer_list: "list of Layer objects", rate: "float",
                        reg_coeff: "float" = 0, momentum_coeff: "float" = 0,
-                       cost_type: "string" = "categorical crossentropy"):
+                       cost_type: "string" = "categorical crossentropy",
+                       early_stop: "boolean" = False):
         """Create a network from a list of layers.
         
         Usage:
-        __init__(layer_list, rate[, reg_coeff, cost_type])
+        __init__(layer_list, rate[, reg_coeff, cost_type, early_stop])
         
         Arguments:
         layer_list -- A list of Layer objects that have the appropriate number
@@ -303,6 +305,7 @@ class BuildNetwork(Network):
         reg_coeff -- The L2 regularization coefficient, a floating point number.
         momentum_coeff -- The coefficient for momentum degradation.
         cost_type -- The cost function to use, a string.
+        early_stop -- A boolean controlling whether to use early stopping.
         
         May raise a type error if the Layer objects don't have the appropriate 
         number of inputs. 
@@ -320,6 +323,7 @@ class BuildNetwork(Network):
                                     "number of inputs of one layer and the " +
                                     "number of neurons in the previous layer.")
         self._set_cost(cost_type)
+        self._set_train(early_stop)
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
 
