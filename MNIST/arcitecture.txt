@@ -1,4 +1,12 @@
-net = neuralnet.Network([(784,"input"),(1000,"relu"),(1000,"relu"),(10,"softmax")],0.13,0.000001,0.9,early_stop = True)
-net.train(train,45000,val,50,tolerance = 0)
+Several architectures have been successful on the MNIST dataset. An architecture
+with 5 hidden layers of 100 ReLU units each has been successful, and one with 4
+hidden layers of 1000 ReLU units each has been even more successful -- achieving
+almost 98% accuracy on the test set without any data augmentation.
 
-Learning rate has been tuned.
+To use the dataset, it is best to scale it first by dividing every value by 255.
+
+The dataset is a pickled tuple consisting of the training set, then the
+validation set, then the test set. It can be loaded with the command 
+
+with gzip.open("mnist_data.pkl.gz") as f:
+    train, val, test = pickle.Unpickler(f).load()
