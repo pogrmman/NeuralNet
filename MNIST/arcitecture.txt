@@ -1,0 +1,4 @@
+net = neuralnet.Network([(784,"input"),(1000,"relu"),(1000,"relu"),(10,"softmax")],0.13,0.000001,0.9,early_stop = True)
+net.train(train,45000,val,50,tolerance = 0)
+
+Learning rate has been tuned.
