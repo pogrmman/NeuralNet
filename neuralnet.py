@@ -8,14 +8,121 @@ import itertools
 import random
 import pickle
 import collections
+import abc
 ### Other Modules ###
 import theano
 import numpy
 ### Import Specific Functions ###
+from abc import ABCMeta, abstractmethod
 from theano import function
 from theano import tensor
 
 ##### Classes #####
+### Abstract Base Classes ###
+## Layer Base Classes ##
+# Base Layer Class #
+class Layer(object, metaclass = ABCMeta):
+    """Parent class for all layer types.
+    
+    Provides the following public method:
+    make_output -- Build a theano expression for the output of this layer.
+    
+    Provides the following attributes:
+    weights -- The weights of this layer.
+    biases -- The biases of this layer.
+    id -- A layer id number.
+    params -- A list of weights and biases.
+    output -- A theano expression for this layer's output. Does not exist until
+              make_output is called.
+    """
+    id = itertools.count()
+    
+    @abstractmethod
+    def __init__(self, w_values: "matrix of weight values"):
+        """Finish layer initialization.
+        
+        Usage:
+        __init__(w_values)
+        
+        Arguments:
+        w_values -- A matrix containing the initialized weight values.
+        
+        This method is only intended to be called to complete initialization of
+        children of this class.
+        """
+        self.id = next(Layer.id)
+        self.biases = theano.shared(value = numpy.zeros((self.outputs,),
+                                                  dtype = theano.config.floatX),
+                                    name = "b",
+                                    borrow = True)
+        self.weights = theano.shared(w_values, name = "W", borrow = True)
+        self.params = [self.weights, self.biases]
+        
+    def make_output(self, input):
+        """Build a theano expression for this layer's output.
+        
+        Usage:
+        make_output(input)
+        
+        Arguments:
+        input -- A theano matrix of the inputs to this layer.
+        """
+        self.output = self.function(tensor.dot(input, self.weights) + 
+                                    self.biases)
+
+# Simple Layers Class #                                    
+class BasicLayer(Layer, metaclass = ABCMeta):
+    """Parent class for most layer types.
+    
+    Provides the following attributes:
+    outputs -- Number of neurons in layer.
+    inputs -- Number of inputs to layer.
+    """
+    @abstractmethod
+    def __init__(self, rng: "random number generator",
+                       inputs: "integer",
+                       outputs: "integer",
+                       init_type: "string" = "glorot"):
+        """Initialize the layer.
+        
+        Usage:
+        __init__(rng, inputs, outputs)
+        
+        Arguments:
+        rng -- A numpy RandomState.
+        inputs -- The number of inputs to this layer.
+        outputs -- The number of neurons in this layer.
+        init_type -- The type of initialization to use.
+        
+        May raise a not implemented error if the init_type is not supported.
+        This method is only intended to be called by children of this class
+        during their initialization.
+        """
+        if init_type == "glorot": # Glorot, Bengio 2010 
+            init_limit = numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        elif init_type == "glorot_tanh": # Glorot, Bengio 2010 
+            init_limit = 4 * numpy.sqrt(6. / (inputs + outputs)) 
+            w_values = numpy.asarray(rng.uniform(low = -init_limit,
+                                                 high = init_limit,
+                                                 size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        elif init_type == "he": # He, et al 2015
+            init_std_dev = numpy.sqrt(2 / outputs)
+            w_values = numpy.asarray(rng.normal(loc = 0,
+                                                scale = init_std_dev,
+                                                size = (inputs, outputs)),
+                                     dtype = theano.config.floatX)
+        else:
+            raise NotImplementedError("The initilization type " + init_type +
+                                      " is not supported")
+        self.outputs = outputs
+        self.inputs = inputs
+        super().__init__(w_values)
+    
 ### Network Class ###
 class Network(object):
     """Create a feedforward neural network
@@ -215,15 +322,6 @@ class Network(object):
             item = self._make_minibatch(data, minbatch_size)
             self.backprop(item[0], item[1])
 
-    def _make_minibatch(self, data, minbatch_size):
-        items = [random.choice(data) for i in range(0, minbatch_size)]
-        inpts = [item[0] for item in items]
-        otpts = [item[1] for item in items]
-        return (inpts,otpts)
-    
-    def _make_prediction(self, datum: "list"):
-        return numpy.argmax(self.forwardprop([datum]))
-    
     def _early_stop_train(self, data: "list of lists",
                                 epochs: "integer",
                                 validation: "list of lists",
@@ -286,6 +384,15 @@ class Network(object):
                     costs = costs[1:]
                     costs.append(cost)
 
+    def _make_minibatch(self, data, minbatch_size):
+        items = [random.choice(data) for i in range(0, minbatch_size)]
+        inpts = [item[0] for item in items]
+        otpts = [item[1] for item in items]
+        return (inpts,otpts)
+    
+    def _make_prediction(self, datum: "list"):
+        return numpy.argmax(self.forwardprop([datum]))
+    
 ### BuildNetwork Class ###
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
@@ -341,111 +448,6 @@ class EnsembleClassifier(object):
         preds = collections.Counter(preds)
         return preds.most_common(1)[0][0]
     
-### Layer Superclasses ###
-## Base Layer Class ##
-class Layer(object):
-    """Parent class for all layer types.
-    
-    Provides the following public method:
-    make_output -- Build a theano expression for the output of this layer.
-    
-    Provides the following attributes:
-    weights -- The weights of this layer.
-    biases -- The biases of this layer.
-    id -- A layer id number.
-    params -- A list of weights and biases.
-    output -- A theano expression for this layer's output. Does not exist until
-              make_output is called.
-    
-    Not intended to be instantiated directly.
-    """
-    id = itertools.count()
-    def __init__(self, w_values: "matrix of weight values"):
-        """Finish layer initialization.
-        
-        Usage:
-        __init__(w_values)
-        
-        Arguments:
-        w_values -- A matrix containing the initialized weight values.
-        
-        This method is only intended to be called to complete initialization of
-        children of this class.
-        """
-        self.id = next(Layer.id)
-        self.biases = theano.shared(value = numpy.zeros((self.outputs,),
-                                                  dtype = theano.config.floatX),
-                                    name = "b",
-                                    borrow = True)
-        self.weights = theano.shared(w_values, name = "W", borrow = True)
-        self.params = [self.weights, self.biases]
-        
-    def make_output(self, input):
-        """Build a theano expression for this layer's output.
-        
-        Usage:
-        make_output(input)
-        
-        Arguments:
-        input -- A theano matrix of the inputs to this layer.
-        """
-        self.output = self.function(tensor.dot(input, self.weights) + 
-                                    self.biases)
-
-## Simple Layers Class ##                                    
-class BasicLayer(Layer):
-    """Parent class for most layer types.
-    
-    Provides the following attributes:
-    outputs -- Number of neurons in layer.
-    inputs -- Number of inputs to layer.
-    
-    Not intended to be instantiated directly.
-    """
-    def __init__(self, rng: "random number generator",
-                       inputs: "integer",
-                       outputs: "integer",
-                       init_type: "string" = "glorot"):
-        """Initialize the layer.
-        
-        Usage:
-        __init__(rng, inputs, outputs)
-        
-        Arguments:
-        rng -- A numpy RandomState.
-        inputs -- The number of inputs to this layer.
-        outputs -- The number of neurons in this layer.
-        init_type -- The type of initialization to use.
-        
-        May raise a not implemented error if the init_type is not supported.
-        This method is only intended to be called by children of this class
-        during their initialization.
-        """
-        if init_type == "glorot": # Glorot, Bengio 2010 
-            init_limit = numpy.sqrt(6. / (inputs + outputs)) 
-            w_values = numpy.asarray(rng.uniform(low = -init_limit,
-                                                 high = init_limit,
-                                                 size = (inputs, outputs)),
-                                     dtype = theano.config.floatX)
-        elif init_type == "glorot_tanh": # Glorot, Bengio 2010 
-            init_limit = 4 * numpy.sqrt(6. / (inputs + outputs)) 
-            w_values = numpy.asarray(rng.uniform(low = -init_limit,
-                                                 high = init_limit,
-                                                 size = (inputs, outputs)),
-                                     dtype = theano.config.floatX)
-        elif init_type == "he": # He, et al 2015
-            init_std_dev = numpy.sqrt(2 / outputs)
-            w_values = numpy.asarray(rng.normal(loc = 0,
-                                                scale = init_std_dev,
-                                                size = (inputs, outputs)),
-                                     dtype = theano.config.floatX)
-        else:
-            raise NotImplementedError("The initilization type " + init_type +
-                                      " is not supported")
-        self.outputs = outputs
-        self.inputs = inputs
-        super().__init__(w_values)
-
 ### Layer Classes ###
 ## Hyperbolic Tangent Layer ##
 class Tanh(BasicLayer):
