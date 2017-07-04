@@ -61,7 +61,7 @@ a training set, a test set, and a validation set.
 The pickles are stored in a form usable by Network objects provided by 
 neuralnetwork.py. You can access the datasets as follows:
 ```
-with open($FILENAME$) as f:
+with open($FILENAME$, "rb") as f:
   train, test, val = pickle.Unpickler(f).load()
 ```
 Due to its size, the MNIST dataset is stored with gzip. It needs to be opened using gzip.open instead of open.
