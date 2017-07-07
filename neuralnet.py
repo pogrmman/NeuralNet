@@ -307,7 +307,7 @@ class Network(object):
         minibatches_per_epoch = len(data) // minibatch_size
         for i in range(0, epochs):
             for j in range(0, minibatches_per_epoch):
-                yield self._make_minibatch(data, minibatch_size)
+                yield (i, self._make_minibatch(data, minibatch_size))
                 
     def _basic_train(self, data: "list of lists", 
                            epochs: "integer",
@@ -327,8 +327,7 @@ class Network(object):
         backprop method.
         """
         data_gen = self._data_generator(data, epochs, minibatch_size)
-        for i in range(0, epochs):
-            item = next(data_gen)
+        for epoch, item in data_gen:
             self.backprop(item[0], item[1])
 
     def _early_stop_train(self, data: "list of lists",
@@ -362,33 +361,24 @@ class Network(object):
         the validation data decreases too much.
         """
         data_gen = self._data_generator(data, epochs, minibatch_size)
+        val_gen = self._data_generator(validation, epochs, minibatch_size)
         if min_epochs == 0:
             min_epochs = epochs // 5
         if check_every == 0:
             check_every = min_epochs // 5
-        val_gen = self._data_generator(validation, epochs, minibatch_size)
-        item = next(val_gen)
-        cost = numpy.mean(self.cost_calc(item[0],item[1]))
+        val_epoch, val_item = next(val_gen)
+        cost = numpy.mean(self.cost_calc(val_item[0],val_item[1]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
-        for i in range(1,min_epochs):
-            item = next(data_gen)
+        for epoch, item in data_gen:
             self.backprop(item[0],item[1])
             if i % check_every == 0:
-                item = next(val_gen)
-                cost = numpy.mean(self.cost_calc(item[0],item[1]))
-                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
-                costs.append(cost)
-        for i in range(min_epochs,epochs):
-            item = next(data_gen)
-            self.backprop(item[0],item[1])
-            if i % check_every == 0:
-                item = next(data_gen)
-                cost = numpy.mean(self.cost_calc(item[0],item[1]))
+                val_epoch, val_item = next(val_gen)
+                cost = numpy.mean(self.cost_calc(val_item[0],val_item[1]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
                 threshold = avg * tolerance
-                if cost > avg + threshold:
+                if epoch > min_epochs and cost > avg + threshold:
                     print("Stopping early!")
                     break
                 else:
