@@ -300,7 +300,15 @@ class Network(object):
         self.cost_calc = function(inputs = [self._inpt, self._otpt],
                                   outputs = self.cost,
                                   allow_input_downcast = True)
-    
+
+    def _data_generator(self, data: "list of lists",
+                              epochs: "integer",
+                              minibatch_size: "integer"):
+        minibatches_per_epoch = len(data) // minibatch_size
+        for i in range(0, epochs):
+            for j in range(0, minibatches_per_epoch):
+                yield self._make_minibatch(data, minibatch_size)
+                
     def _basic_train(self, data: "list of lists", 
                            epochs: "integer",
                            minbatch_size: "integer"):
@@ -318,8 +326,9 @@ class Network(object):
         This method updates the weights and biases of the network using the
         backprop method.
         """
+        data_gen = self._data_generator(data, epochs, minibatch_size)
         for i in range(0, epochs):
-            item = self._make_minibatch(data, minbatch_size)
+            item = next(data_gen)
             self.backprop(item[0], item[1])
 
     def _early_stop_train(self, data: "list of lists",
@@ -352,27 +361,29 @@ class Network(object):
         backprop method. It stops the training early if the performance on
         the validation data decreases too much.
         """
+        data_gen = self._data_generator(data, epochs, minibatch_size)
         if min_epochs == 0:
             min_epochs = epochs // 5
         if check_every == 0:
             check_every = min_epochs // 5
-        item = self._make_minibatch(validation, minbatch_size)
+        val_gen = self._data_generator(validation, epochs, minibatch_size)
+        item = next(val_gen)
         cost = numpy.mean(self.cost_calc(item[0],item[1]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
         for i in range(1,min_epochs):
-            item = self._make_minibatch(data, minbatch_size)
+            item = next(data_gen)
             self.backprop(item[0],item[1])
             if i % check_every == 0:
-                item = self._make_minibatch(validation, minbatch_size)
+                item = next(val_gen)
                 cost = numpy.mean(self.cost_calc(item[0],item[1]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 costs.append(cost)
         for i in range(min_epochs,epochs):
-            item = self._make_minibatch(data, minbatch_size)
+            item = next(data_gen)
             self.backprop(item[0],item[1])
             if i % check_every == 0:
-                item = self._make_minibatch(validation, minbatch_size)
+                item = next(data_gen)
                 cost = numpy.mean(self.cost_calc(item[0],item[1]))
                 print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
