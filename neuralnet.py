@@ -311,7 +311,7 @@ class Network(object):
                 
     def _basic_train(self, data: "list of lists", 
                            epochs: "integer",
-                           minbatch_size: "integer"):
+                           minibatch_size: "integer"):
         """Train the neural network using SGD.
         
         Usage:
@@ -333,7 +333,7 @@ class Network(object):
     def _early_stop_train(self, data: "list of lists",
                                 epochs: "integer",
                                 validation: "list of lists",
-                                minbatch_size: "integer",
+                                minibatch_size: "integer",
                                 min_epochs = 0,
                                 check_every = 0,
                                 tolerance = 0.20):
@@ -370,12 +370,14 @@ class Network(object):
         cost = numpy.mean(self.cost_calc(val_item[0],val_item[1]))
         print("Epoch 0 -- cost is " + str(round(cost,2)))
         costs = [cost]
+        last_check = 0
         for epoch, item in data_gen:
             self.backprop(item[0],item[1])
-            if i % check_every == 0:
+            if epoch != last_check and epoch % check_every == 0:
+                last_check = epoch
                 val_epoch, val_item = next(val_gen)
                 cost = numpy.mean(self.cost_calc(val_item[0],val_item[1]))
-                print("Epoch " + str(i) + " -- cost is " + str(round(cost,2)))
+                print("Epoch " + str(epoch) + " -- cost is " + str(round(cost,2)))
                 avg = numpy.mean(costs)
                 threshold = avg * tolerance
                 if epoch > min_epochs and cost > avg + threshold:
