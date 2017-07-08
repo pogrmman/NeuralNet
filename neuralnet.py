@@ -140,11 +140,12 @@ class Network(object):
     def __init__(self, net_data: "list of tuples", rate: "float", 
                        reg_coeff: "float" = 0, momentum_coeff: "float" = 0,
                        cost_type: "string"  = "categorical crossentropy",
-                       seed: "integer" = 100, early_stop: "boolean" = False):
+                       seed: "integer" = 100, early_stop: "boolean" = False,
+                       checkpointing: "boolean" = False):
         """Initialize the neural network
         
         Usage:
-        __init__(net_data, rate[, reg_coeff, momentum_coeff, seed, early_stop])
+        __init__(net_data, rate[, reg_coeff, momentum_coeff, seed, early_stop, checkpointing])
         
         Arguments:
         net_data -- A list of tuples of the form (number of neurons, layer type)
@@ -156,6 +157,7 @@ class Network(object):
         cost_type -- The type of cost function.
         seed -- A seed for the rng for initialization.
         early_stop -- A boolean controlling whether to use early stopping.
+        checkpointing -- A boolean controlling whether to save intermediate networks to the disk.
         """
         reset_layer_ids()
         self._data = net_data
@@ -172,6 +174,10 @@ class Network(object):
         self._set_train(early_stop)
         self._build_forwardprop()
         self._build_backprop(rate, reg_coeff, momentum_coeff)
+        if checkpointing:
+            self.checkpoint = self._checkpoint
+        else:
+            self.checkpoint = pass
         
     def _make_layer(self, kind: "layer type",
                          inputs: "integer", 
@@ -327,7 +333,12 @@ class Network(object):
         backprop method.
         """
         data_gen = self._data_generator(data, epochs, minibatch_size)
+        last_checkpoint = 0
+        self.checkpoint(last_checkpoint)
         for epoch, item in data_gen:
+            if epoch != last_checkpoint and epoch % 100 == 0:
+                self.checkpoint(epoch)
+                last_checkpoint = epoch
             self.backprop(item[0], item[1])
 
     def _early_stop_train(self, data: "list of lists",
@@ -374,6 +385,7 @@ class Network(object):
         for epoch, item in data_gen:
             self.backprop(item[0],item[1])
             if epoch != last_check and epoch % check_every == 0:
+                self.checkpoint(epoch)
                 last_check = epoch
                 val_epoch, val_item = next(val_gen)
                 cost = numpy.mean(self.cost_calc(val_item[0],val_item[1]))
@@ -395,7 +407,10 @@ class Network(object):
     
     def _make_prediction(self, datum: "list"):
         return numpy.argmax(self.forwardprop([datum]))
-    
+
+    def _checkpoint(self, epoch):
+        save_network(self, "Epoch_" + str(epoch))
+        
 ### BuildNetwork Class ###
 class BuildNetwork(Network):
     """Builds a network from a list of layers."""
