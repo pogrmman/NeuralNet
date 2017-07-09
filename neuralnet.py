@@ -177,7 +177,7 @@ class Network(object):
         if checkpointing:
             self.checkpoint = self._checkpoint
         else:
-            self.checkpoint = pass
+            self.checkpoint = lambda x: None
         
     def _make_layer(self, kind: "layer type",
                          inputs: "integer", 
