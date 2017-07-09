@@ -53,18 +53,19 @@ You can then clone the repository with
 Run an interactive Python shell in the directory, and type 
 `import neuralnetwork`
 
-This repository contains two datasets frequently used for machine learning 
-tasks - the [iris dataset](https://archive.ics.uci.edu/ml/datasets/iris) and the 
+This repository contains three datasets frequently used for machine learning 
+tasks - the [MNIST handwriting dataset](http://yann.lecun.com/exdb/mnist/), the [iris dataset](https://archive.ics.uci.edu/ml/datasets/iris), and the 
 [abalone dataset](https://archive.ics.uci.edu/ml/datasets/abalone). The 
 directories for each dataset contain pickles of the dataset, divided into
-a test set and a training set (and a validation set for the abalone dataset). 
+a training set, a test set, and a validation set. 
 The pickles are stored in a form usable by Network objects provided by 
 neuralnetwork.py. You can access the datasets as follows:
 ```
-f = open("$FILENAME$.pkl", "rb")
-$VARIABLE$ = pickle.Unpickler(f).load()
-f.close()
+with open($FILENAME$, "rb") as f:
+  train, test, val = pickle.Unpickler(f).load()
 ```
+Due to its size, the MNIST dataset is stored with gzip. It needs to be opened using gzip.open instead of open.
+The MNIST dataset provided here gives much better performance when it is scaled by dividing every value by 255.
 
 To create a basic neural network, you use a command like 
 `net = neuralnetwork.Network(net_description,learning_rate)` where
