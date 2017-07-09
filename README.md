@@ -43,7 +43,7 @@ ensemble networks
 ### Usage
 First install [Theano ~~0.9.0~~ 0.8.2](http://deeplearning.net/software/theano/) and 
 [Numpy](http://www.numpy.org/). Theano 0.9.0 works fine, but has a [memory leak issue when
-there is not a linked version of mkl](https://github.com/Theano/Theano/issues/5810).
+there is not a linked version of BLAS](https://github.com/Theano/Theano/issues/5810).
 It's not noticable on small networks, but on large ones, it can lead to crashing the
 system. You can configure Theano however you'd like, however, this code has not been
 tested on a GPU, so procede with caution. 
