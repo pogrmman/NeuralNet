@@ -42,7 +42,8 @@ ensemble networks
 
 ### Usage
 First install [Theano ~~0.9.0~~ 0.8.2](http://deeplearning.net/software/theano/) and 
-[Numpy](http://www.numpy.org/). Theano 0.9.0 works fine, but has a memory leak issue.
+[Numpy](http://www.numpy.org/). Theano 0.9.0 works fine, but has a [memory leak issue when
+there is not a linked version of mkl](https://github.com/Theano/Theano/issues/5810).
 It's not noticable on small networks, but on large ones, it can lead to crashing the
 system. You can configure Theano however you'd like, however, this code has not been
 tested on a GPU, so procede with caution. 
@@ -64,8 +65,10 @@ neuralnetwork.py. You can access the datasets as follows:
 with open($FILENAME$, "rb") as f:
   train, test, val = pickle.Unpickler(f).load()
 ```
-Due to its size, the MNIST dataset is stored with gzip. It needs to be opened using gzip.open instead of open.
 The MNIST dataset provided here gives much better performance when it is scaled by dividing every value by 255.
+The script `load_imgs.py` will properly load and scale the dataset into a training set, a test set, and a validaiton set.
+After running it inside of a python instance, you'll have the variables train, test, and val that have their respective data.
+It takes a moment because of the size of the dataset.
 
 To create a basic neural network, you use a command like 
 `net = neuralnetwork.Network(net_description,learning_rate)` where
